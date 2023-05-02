@@ -1,0 +1,220 @@
+<html>
+
+<head>
+    <title> Harvey-Weinstien Equilibrium Simulation </title>
+
+    <meta charset="utf-8">
+    <style>
+        table {
+          font-family: arial, sans-serif;
+          border-collapse: collapse;
+          width: 100%;
+        }
+        
+        td, th {
+          border: 1px solid #dddddd;
+          text-align: left;
+          padding: 8px;
+        }
+        
+        tr:nth-child(even) {
+          background-color: #dddddd;
+        }
+    </style>
+    </script>
+</head>
+<body>
+    <script>
+        let add = 0;
+        let die = 0;
+        let population = 100
+        let total_alleles = 2*population
+
+        let  allele_freq_A = 0;
+        let allele_freq_a = 0;
+
+        let genotype_freq_AA = 0;
+        let genotype_freq_Aa = 0;
+        let genotype_freq_aa = 0;
+
+        let curr_gen = 0;
+        
+
+        function createStartRabbits(amount){
+            let container = document.getElementById("rabbitContainer");
+            for (let i = 0; i < amount; i++){
+                let im = document.createElement("img");
+                let dec = Math.random();
+                if (dec <= 0.50){
+                    im.src = "./images/blackrabbit.png"
+                    im.name = "black"
+                }
+                else {
+                    im.src = "./images/whiterabbit.png"
+                    im.name = "white"
+                }
+
+                
+                im.width = 50;
+                im.length = 50;
+                container.appendChild(im);
+            }
+            setValues();
+        }
+
+        function setValues(){
+            allele_count_A = 2*(document.getElementsByName("white").length)+Math.floor((document.getElementsByName("gray").length/2));
+            allele_count_a = 2*(document.getElementsByName("black").length)+Math.floor((document.getElementsByName("gray").length/2));;
+
+            allele_freq_A = allele_count_A/total_alleles;
+            allele_freq_a = allele_count_a/total_alleles;
+            genotype_freq_AA = allele_freq_A ** 2;
+            genotype_freq_Aa = 2 * allele_freq_A * allele_freq_a;
+            genotype_freq_aa = allele_freq_a ** 2;
+
+            document.getElementById("whitecoat").innerHTML = "Number white: " + (document.getElementsByName("white").length).toString();
+            document.getElementById("blackcoat").innerHTML = "Number black: " + (document.getElementsByName("black").length).toString();
+            document.getElementById("graycoat").innerHTML = "Number gray: " + (document.getElementsByName("gray").length).toString();
+
+        }
+
+        function createRabbits(amount, color){
+            let div = document.getElementById("rabbitContainer")
+            if (color === "white"){
+                for (let i = 0; i <= amount; i++){
+                let im = document.createElement("img");
+                im.src = "./images/whiterabbit.png"
+                im.name = "white"
+                im.width = 50;
+                im.length = 50;
+                div.appendChild(im);
+                }
+            }
+            if (color === "gray"){
+                for (let i = 0; i <= amount; i++){
+                let im = document.createElement("img");
+                im.src = "./images/grayrabbit.png"
+                im.name = "gray"
+                im.width = 50;
+                im.length = 50;
+                div.appendChild(im);
+                }
+            }
+            if (color === "black"){
+                for (let i = 0; i <= amount; i++){
+                let im = document.createElement("img");
+                im.src = "./images/blackrabbit.png"
+                im.name = "black"
+                im.width = 50;
+                im.length = 50;
+                div.appendChild(im);
+                }
+            }
+        }
+
+        function createNextGen(freqAA, freqAa, freqaa){
+            let nextWhite = Math.round((population * freqAA))
+            let nextGray = Math.round((population * freqAa))
+            let nextBlack = Math.round((population * freqaa))
+
+            if (nextWhite+nextGray+nextBlack != 100){
+                let diff = 100 - nextWhite;
+                while(nextBlack+nextGray+nextWhite != 100){
+                    let val = Math.random()
+                    if (val <= 0.33){
+                        nextGray = nextGray + 1*Math.sign(diff);
+                    }
+                    else if (val <= 0.66){
+                        nextGray = nextWhite + 1*Math.sign(diff);
+                    }
+                    else if (val <= 0.99){
+                        nextGray = nextBlack + 1*Math.sign(diff);
+                    }
+                
+                }
+            }
+            console.log(nextBlack);
+            console.log(nextGray);
+            console.log(nextWhite);
+            createRabbits(nextWhite, "white");
+            createRabbits(nextGray, "gray");
+            createRabbits(nextBlack, "black");
+            
+        }
+
+
+        function nextGen(){
+
+            let k = Math.random();
+            if (k > 0.5){
+                allele_freq_A  -= Math.random();
+                allele_freq_a -= Math.random();
+                genotype_freq_AA  -= Math.random();
+                genotype_freq_Aa  -= Math.random();
+                genotype_freq_aa  -= Math.random();
+            }
+            else {
+                if (k > 0.5){
+                allele_freq_A  += Math.random();
+                allele_freq_a += Math.random();
+                genotype_freq_AA  += Math.random();
+                genotype_freq_Aa  += Math.random();
+                genotype_freq_aa  += Math.random();
+            }
+            }
+
+
+            let table = document.getElementById("data");
+            let tr = table.insertRow(-1);
+            let gen = tr.insertCell(-1).innerHTML = curr_gen.toString();
+            let num_white = tr.insertCell(-1).innerHTML = (document.getElementsByName("white").length).toString();
+            let num_black = tr.insertCell(-1).innerHTML = (document.getElementsByName("gray").length).toString();
+            let num_gray = tr.insertCell(-1).innerHTML = (document.getElementsByName("black").length).toString();
+            let expected = tr.insertCell(-1)
+            if (curr_gen == 0){
+                expected.innerHTML = "N/A"
+            }
+            else {
+                let ewhite = Math.floor(population * genotype_freq_AA);
+                let egray = Math.floor(population * genotype_freq_Aa);
+                let eblack = Math.floor(population * genotype_freq_aa);
+                expected.innerHTML = "(" + ewhite.toString() + "," +  egray.toString() + "," + eblack.toString()+")"
+            }
+            
+            curr_gen ++;
+            let div = document.getElementById("rabbitContainer").innerHTML = "";
+            createNextGen(genotype_freq_AA, genotype_freq_Aa, genotype_freq_aa);
+
+        }
+
+        window.onload = (event) => {
+            createStartRabbits(population);
+        };
+    </script>
+    <body style="background-color: antiquewhite;">
+    <h1> Harvey-Weinstien Equilibrium Data Simulation </h1>
+    <h3> Click the button below to begin! </h3>
+    <div>
+        <p> Population = 100 </p> 
+        <p id="whitecoat"></p>
+        <p id="graycoat"></p>
+        <p id="blackcoat"></p>
+    </div>
+    <div id="rabbitContainer">
+    </div>
+    <button id="start" onclick="nextGen()">Start</button>
+
+    <table id = "data">
+        <tr>
+            <th> Generation </th>
+            <th> Number of AA (White) </th>  
+            <th> Number of Aa (Gray) </th>
+            <th> Number of aa (black) </th>
+            <th> Expected Number (White, Gray, Black) </th>
+        </tr>
+       
+        
+    </table>
+</body> 
+</body>
+</html>
